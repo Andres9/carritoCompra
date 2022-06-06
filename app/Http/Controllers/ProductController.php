@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequest;
 use App\Product;
 use Illuminate\Http\Request;
 
@@ -22,39 +23,30 @@ class ProductController extends Controller
     {
         return view('products.create');
     }
-    public function store()
+    public function store(ProductRequest $request)
     {
-        $rules = [
-            'title' => ['required', 'max:255'],
-            'description' => ['required', 'max:1000'],
-            'price' => ['required', 'min:1'],
-            'stock' => ['required', 'min:0'],
-            'status' => ['required', 'in: available,unavailable'],
-        ];
-
-        request()->validate($rules);
-
-        if (request()->status == 'available' && request()->stock == 0) {
+     
+    /*     if ($request->status == 'available' && $request->stock == 0) { */
           /*   session()->flash('error', 'if available must have stock '); */
             /* session()->put('error','if available must have stock '); */
 
-            return redirect()
+   /*          return redirect()
                             ->back()
-                            ->withInput(request()->all())
+                            ->withInput($request->all())
                             ->withErrors('if available must have stock ');
-        }
+        } */
 
         /* session()->forget('error'); */
 
         /*    $product = Product::create([
-            'title' => request() -> title,
-            'description' => request() -> description,
-            'price' => request()->price,
-            'stock' => request()->stock,
-            'status' => request()->status,
+            'title' => $request -> title,
+            'description' => $request -> description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'status' => $request->status,
         ]);*/
 
-        $product = Product::create(request()->all());
+        $product = Product::create($request->validated());
      /*    session()->flash('success', "The new product with id {$product -> id} was created"); */
         /*     return $product; */
         //Formas de redireccionar
@@ -65,9 +57,11 @@ class ProductController extends Controller
         ->withSuccess("The new product with id {$product -> id} was created");
     }
 
-    public function show($product)
+    /* --------------------- Inyeccion implicita de modelos --------------------- */
+    public function show(Product $product)
     {
-        $product = Product::findOrFail($product);
+
+     /*    $product = Product::findOrFail($product); */
 
         return view('products.show')->with([
             'product' => $product,
@@ -81,10 +75,10 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update($product)
+    public function update(ProductRequest $request,Product $product)
     {
 
-        $rules = [
+/*         $rules = [
             'title' => ['required', 'max:255'],
             'description' => ['required', 'max:1000'],
             'price' => ['required', 'min:1'],
@@ -92,20 +86,18 @@ class ProductController extends Controller
             'status' => ['required', 'in: available,unavailable'],
         ];
 
-        request()->validate($rules);
+        request()->validate($rules); */
 
-        $product = Product::findOrFail($product);
-
-        $product->update(request()->all());
+        $product->update(request()->validated());
 
         return redirect()
         ->route("products.index")
         ->withSuccess("The product with id {$product -> id} was edited. ");
     }
 
-    public function destroy($product)
+    public function destroy(Product $product)
     {
-        $product = Product::findOrFail($product);
+   
         $product->delete();
         return redirect()
         ->route("products.index")
